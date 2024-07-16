@@ -1,0 +1,55 @@
+﻿@page "/Identity/Account/Register"
+@using System.ComponentModel.DataAnnotations
+@inject HttpClient HttpClient
+@inject AuthentificationService AuthenticationStateProvider
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager Navigation
+
+<h3>Register</h3>
+
+<EditForm Model="registerModel" OnValidSubmit="HandleRegister">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <InputText id="email" class="form-control" @bind-Value="registerModel.Email" />
+        <ValidationMessage For="() => registerModel.Email" />
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        <InputText id="password" type="password" class="form-control" @bind-Value="registerModel.Password" />
+        <ValidationMessage For="() => registerModel.Password" />
+    </div>
+    <button type="submit" class="btn btn-primary">Register</button>
+</EditForm>
+
+@code {
+    private RegisterModel registerModel = new RegisterModel();
+
+    private async Task HandleRegister()
+    {
+        var result = await HttpClient.PostAsJsonAsync("api/account/register", registerModel);
+
+        if (result.IsSuccessStatusCode)
+        {
+            var token = await result.Content.ReadAsStringAsync();
+            await LocalStorage.SetItemAsync("authToken", token);
+            AuthenticationStateProvider.MarkUserAsAuthenticated(token);
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            // Gérer les erreurs d'inscription
+        }
+    }
+
+    public class RegisterModel
+    {
+        [Required]
+        public string Email { get; set; }
+
+        [Required]
+        public string Password { get; set; }
+    }
+}

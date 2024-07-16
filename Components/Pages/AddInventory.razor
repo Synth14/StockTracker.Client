@@ -1,0 +1,84 @@
+﻿@page "/addinventory"
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization
+
+@using StockTracker.Client.Models
+@using StockTracker.Client.Services
+@inject IInventoryService _inventoryService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider _authenticationStateProvider
+
+
+<h1>Add New Inventory Item</h1>
+
+<EditForm Model="@inventoryItem" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="brand">Brand: </label>
+        <InputSelect id="brand" class="form-control" @bind-Value="inventoryItem.Brand">
+            <option value="">Select a brand...</option>
+            @foreach (var brand in brands)
+            {
+                <option value="@brand.Name">@brand.Name</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => inventoryItem.Brand" />
+    </div>
+    <div class="form-group">
+        <label for="model">Model: </label>
+        <InputText id="model" class="form-control" @bind-Value="inventoryItem.Model" />
+        <ValidationMessage For="() => inventoryItem.Model" />
+    </div>
+    <div class="form-group">
+        <label for="serialNumber">Serial Number: </label>
+        <InputText id="serialNumber" class="form-control" @bind-Value="inventoryItem.SerialNumber" />
+        <ValidationMessage For="() => inventoryItem.SerialNumber" />
+    </div>
+    <div class="form-group">
+        <label for="recoveryDate">Recovery Date: </label>
+        <InputDate id="recoveryDate" class="form-control" @bind-Value="inventoryItem.RecoveryDate" />
+        <ValidationMessage For="() => inventoryItem.RecoveryDate" />
+    </div>
+    <div class="form-group">
+        <label for="verificationDate">Verification Date: </label>
+        <InputDate id="verificationDate" class="form-control" @bind-Value="inventoryItem.VerificationDate" />
+        <ValidationMessage For="() => inventoryItem.VerificationDate" />
+    </div>
+    <div class="form-group">
+        <label for="verifiedBy">Verified By: </label>
+        <InputText id="verifiedBy" class="form-control" @bind-Value="inventoryItem.VerifiedBy" readonly="true" />
+        <ValidationMessage For="() => inventoryItem.VerifiedBy" />
+    </div>
+    <div class="form-group">
+        <label for="description">Description: </label>
+        <InputText id="description" class="form-control" @bind-Value="inventoryItem.Description" />
+        <ValidationMessage For="() => inventoryItem.Description" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</EditForm>
+
+@code {
+    private InventoryItem inventoryItem = new InventoryItem();
+    private List<Brand> brands = new List<Brand>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        brands = await _inventoryService.GetBrandsAsync();
+        var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            inventoryItem.VerifiedBy = user.Identity.Name;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        await _inventoryService.AddInventoryItemAsync(inventoryItem);
+        NavigationManager.NavigateTo("/inventory");
+    }
+}

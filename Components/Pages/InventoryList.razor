@@ -1,0 +1,74 @@
+﻿@page "/inventory"
+@using Microsoft.AspNetCore.Components
+@using StockTracker.Client.Models
+@using StockTracker.Client.Services
+@inject IInventoryService InventoryService
+@inject NavigationManager NavigationManager
+@* @rendermode InteractiveServer *@
+
+<h3>Inventory List</h3>
+
+@if (inventoryItems == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Brand</th>
+                <th>Model</th>
+                <th>Serial Number</th>
+                <th>Recovery Date</th>
+                <th>Verification Date</th>
+                <th>Verified By</th>
+                <th>Description</th>
+                <th>Actions</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in inventoryItems)
+            {
+                <tr>
+                    <td>@item.Brand</td>
+                    <td>@item.Model</td>
+                    <td>@item.SerialNumber</td>
+                    <td>@item.RecoveryDate</td>
+                    <td>@item.VerificationDate</td>
+                    <td>@item.VerifiedBy</td>
+                    <td>@item.Description</td>
+
+                    <td>
+                        <button @onclick="async () => EditItem(item.Id)">Edit</button>
+                        <button @onclick="async () => await DeleteItem(item.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<InventoryItem> inventoryItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine("OnInitializedAsync called");
+        inventoryItems = await InventoryService.GetInventoryItemsAsync();
+    }
+
+    private void EditItem(int id)
+    {
+        Console.WriteLine($"EditItem called with id: {id}");
+        NavigationManager.NavigateTo($"/editinventory/{id}");
+    }
+
+    private async Task DeleteItem(int id)
+    {
+        Console.WriteLine($"DeleteItem called with id: {id}");
+        await InventoryService.DeleteInventoryItemAsync(id);
+        inventoryItems = await InventoryService.GetInventoryItemsAsync();
+    }
+}

@@ -5,25 +5,30 @@
 @using Microsoft.AspNetCore.Identity
 @using StockTracker.Client.Models
 
-<AuthorizeView>
-    <Authorized>
-        <div class="top-row px-4">
-            <button class="btn btn-link" @onclick="Logout">Logout</button>
-            <span class="font-weight-bold ml-4">Hello, @context.User.Identity.Name</span>
-        </div>
-    </Authorized>
-    <NotAuthorized>
-        <div class="top-row px-4">
-            <a href="Identity/Account/Login">Login</a>
-        </div>
-    </NotAuthorized>
-</AuthorizeView>
-
-<main>
-    <article class="content px-4">
-        @Body
-    </article>
-</main>
+<CascadingAuthenticationState>
+    <div class="page">
+        <NavMenu />
+        <AuthorizeView>
+            <Authorized>
+                <div class="top-row px-4">
+                    <button class="btn btn-link" @onclick="Logout">Logout</button>
+                    <span class="font-weight-bold ml-4">Hello, @context.User.Identity.Name</span>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="top-row px-4">
+                    <a href="Identity/Account/Login">Login</a>
+                </div>
+                <div class="top-row px-4">
+                    <a href="Identity/Account/Register">Register</a>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+        <main>
+            @Body
+        </main>
+    </div>
+</CascadingAuthenticationState>
 
 @code {
     private async Task Logout()

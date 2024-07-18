@@ -1,5 +1,4 @@
-﻿
-namespace StockTracker.Client.Services
+﻿namespace StockTracker.Client.Services
 {
     public class LocalStorageService : ILocalStorageService
     {
@@ -10,16 +9,15 @@ namespace StockTracker.Client.Services
             _jsRuntime = jsRuntime;
         }
 
-        public async Task SetItemAsync<T>(string key, T item)
-        {
-            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", key, JsonSerializer.Serialize(item));
-        }
-
         public async Task<T> GetItemAsync<T>(string key)
         {
             var json = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", key);
+            return json == null ? default(T) : JsonSerializer.Deserialize<T>(json);
+        }
 
-            return json == null ? default : JsonSerializer.Deserialize<T>(json);
+        public async Task SetItemAsync<T>(string key, T value)
+        {
+            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", key, JsonSerializer.Serialize(value));
         }
 
         public async Task RemoveItemAsync(string key)

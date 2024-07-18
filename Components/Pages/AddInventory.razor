@@ -9,7 +9,6 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider _authenticationStateProvider
 
-
 <h1>Add New Inventory Item</h1>
 
 <EditForm Model="@inventoryItem" OnValidSubmit="@HandleValidSubmit">
@@ -64,16 +63,31 @@
 @code {
     private InventoryItem inventoryItem = new InventoryItem();
     private List<Brand> brands = new List<Brand>();
+    private bool isInitialized;
 
     protected override async Task OnInitializedAsync()
     {
         brands = await _inventoryService.GetBrandsAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitializeAuthenticationStateAsync();
+        }
+    }
+
+    private async Task InitializeAuthenticationStateAsync()
+    {
         var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         if (user.Identity.IsAuthenticated)
         {
             inventoryItem.VerifiedBy = user.Identity.Name;
         }
+        isInitialized = true;
+        StateHasChanged();
     }
 
     private async Task HandleValidSubmit()

@@ -12,15 +12,17 @@ namespace StockTracker.Client
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
-            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:32772/") });
+            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:32770/") });
             builder.Services.AddScoped<AuthenticationStateProvider, AuthentificationService>();
             builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
             builder.Services.AddScoped<IInventoryService, InventoryService>();
+            builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddHttpClient();
 
             builder.Services.AddOptions();
             builder.Services.AddAuthorizationCore();
+            builder.Services.AddAuthentication();
 
 
             var app = builder.Build();

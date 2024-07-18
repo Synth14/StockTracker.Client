@@ -27,6 +27,21 @@
 @code {
     private RegisterModel registerModel = new RegisterModel();
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitializeAuthenticationStateAsync();
+        }
+    }
+
+    private async Task InitializeAuthenticationStateAsync()
+    {
+        // Initialisation du service d'authentification après le rendu initial
+        await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        StateHasChanged();
+    }
+
     private async Task HandleRegister()
     {
         var result = await HttpClient.PostAsJsonAsync("api/account/register", registerModel);

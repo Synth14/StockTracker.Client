@@ -1,30 +1,42 @@
-﻿namespace StockTracker.Client.Services.AuthentifcationService
+﻿namespace StockTracker.Client.Services.AuthentificationService
 {
-
-
-    public class AuthentificationService : AuthenticationStateProvider
+    public class AuthentificationService : AuthenticationStateProvider, IAsyncDisposable
     {
         private readonly HttpClient _httpClient;
         private readonly ILocalStorageService _localStorage;
+        private readonly IJSRuntime _jsRuntime;
+        private bool _isInitialized;
+        private AuthenticationState _authState;
 
-        public AuthentificationService(HttpClient httpClient, ILocalStorageService localStorage)
+        public AuthentificationService(HttpClient httpClient, ILocalStorageService localStorage, IJSRuntime jsRuntime)
         {
             _httpClient = httpClient;
             _localStorage = localStorage;
+            _jsRuntime = jsRuntime;
+            _authState = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
+            if (!_isInitialized)
+            {
+                await InitializeAsync();
+            }
+            return _authState;
+        }
+
+        public async Task InitializeAsync()
+        {
             var token = await _localStorage.GetItemAsync<string>("authToken");
 
-            if (string.IsNullOrWhiteSpace(token))
+            if (!string.IsNullOrWhiteSpace(token))
             {
-                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                _authState = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt")));
             }
 
-            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt")));
+            NotifyAuthenticationStateChanged(Task.FromResult(_authState));
+            _isInitialized = true;
         }
 
         public void MarkUserAsAuthenticated(string token)
@@ -59,6 +71,10 @@
             }
             return Convert.FromBase64String(base64);
         }
-    }
 
+        public async ValueTask DisposeAsync()
+        {
+            // Dispose logic if needed
+        }
+    }
 }

@@ -27,6 +27,21 @@
 @code {
     private LoginModel loginModel = new LoginModel();
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitializeAuthenticationStateAsync();
+        }
+    }
+
+    private async Task InitializeAuthenticationStateAsync()
+    {
+        // Initialisation du service d'authentification après le rendu initial
+        await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        StateHasChanged();
+    }
+
     private async Task HandleLogin()
     {
         var result = await HttpClient.PostAsJsonAsync("api/account/login", loginModel);
@@ -42,14 +57,5 @@
         {
             // Gérer les erreurs de connexion
         }
-    }
-
-    public class LoginModel
-    {
-        [Required]
-        public string Email { get; set; }
-
-        [Required]
-        public string Password { get; set; }
     }
 }

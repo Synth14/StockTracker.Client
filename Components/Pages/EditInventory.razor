@@ -79,7 +79,7 @@ else
     private async Task HandleValidSubmit()
     {
         await _inventoryService.UpdateInventoryItemAsync(id, inventoryItem);
-        NavigationManager.NavigateTo("/inventory");
+        NavigationManager.NavigateTo("/");
         // Create a patch document
         // var patchDoc = new JsonPatchDocument<InventoryItem>();
 

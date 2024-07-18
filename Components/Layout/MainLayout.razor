@@ -1,39 +1,23 @@
 ﻿@inherits LayoutComponentBase
-@using Microsoft.AspNetCore.Components.Authorization
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject NavigationManager NavigationManager
-@using Microsoft.AspNetCore.Identity
-@using StockTracker.Client.Models
 
-<CascadingAuthenticationState>
-    <div class="page">
+<div class="page">
+    <div class="sidebar">
         <NavMenu />
-        <AuthorizeView>
-            <Authorized>
-                <div class="top-row px-4">
-                    <button class="btn btn-link" @onclick="Logout">Logout</button>
-                    <span class="font-weight-bold ml-4">Hello, @context.User.Identity.Name</span>
-                </div>
-            </Authorized>
-            <NotAuthorized>
-                <div class="top-row px-4">
-                    <a href="Identity/Account/Login">Login</a>
-                </div>
-                <div class="top-row px-4">
-                    <a href="Identity/Account/Register">Register</a>
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
-        <main>
-            @Body
-        </main>
     </div>
-</CascadingAuthenticationState>
 
-@code {
-    private async Task Logout()
-    {
-        ((AuthentificationService)AuthenticationStateProvider).MarkUserAsLoggedOut();
-        NavigationManager.NavigateTo("/Identity/Account/Login");
-    }
-}
+    <main>
+        <div class="top-row px-4">
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>

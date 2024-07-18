@@ -1,4 +1,5 @@
-
+using StockTracker.Client.Services;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace StockTracker.Client
 {
@@ -13,18 +14,14 @@ namespace StockTracker.Client
                 .AddInteractiveServerComponents();
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:32770/") });
-            builder.Services.AddScoped<AuthenticationStateProvider, AuthentificationService>();
-            builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
+
+
             builder.Services.AddScoped<IInventoryService, InventoryService>();
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddHttpClient();
 
             builder.Services.AddOptions();
-            builder.Services.AddAuthorizationCore();
-            builder.Services.AddAuthentication();
-
-
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -39,7 +36,6 @@ namespace StockTracker.Client
 
             app.UseStaticFiles();
             app.UseAntiforgery();
-            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapRazorComponents<App>()

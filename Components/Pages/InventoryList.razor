@@ -5,7 +5,7 @@
 @inject IInventoryService InventoryService
 @inject NavigationManager NavigationManager
 
-<MudText Typo="Typo.h3">Inventory List</MudText>
+<MudText Typo="Typo.h3">Inventaire</MudText>
 
 @if (inventoryItems == null)
 {
@@ -15,12 +15,12 @@ else
 {
     <MudTable Items="inventoryItems" Hover="true" Bordered="true" Striped="true">
         <HeaderContent>
-            <MudTh>Brand</MudTh>
-            <MudTh>Model</MudTh>
-            <MudTh>Serial Number</MudTh>
-            <MudTh>Recovery Date</MudTh>
-            <MudTh>Verification Date</MudTh>
-            <MudTh>Verified By</MudTh>
+            <MudTh>Marque</MudTh>
+            <MudTh>Modèle</MudTh>
+            <MudTh>Numéro de série / Service Tag</MudTh>
+            <MudTh>Date de récupération</MudTh>
+            <MudTh>Date de vérification</MudTh>
+            <MudTh>Vérifié par</MudTh>
             <MudTh>Description</MudTh>
             <MudTh>Actions</MudTh>
         </HeaderContent>
@@ -33,8 +33,8 @@ else
             <MudTd DataLabel="Verified By">@context.VerifiedBy</MudTd>
             <MudTd DataLabel="Description">@context.Description</MudTd>
             <MudTd>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => EditItem(context.Id))">Edit</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(async () => await DeleteItem(context.Id))">Delete</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => EditItem(context.Id))">Modifier</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(async () => await DeleteItem(context.Id))">Supprimer</MudButton>
             </MudTd>
         </RowTemplate>
     </MudTable>

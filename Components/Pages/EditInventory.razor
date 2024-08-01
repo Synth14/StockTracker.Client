@@ -23,22 +23,22 @@ else
         <DataAnnotationsValidator />
         <MudCard>
             <MudCardContent>
-                <MudSelect T="string" @bind-Value="inventoryItem.Brand" Label="Brand">
-                    <MudSelectItem Value="@string.Empty">Select a brand...</MudSelectItem>
+                <MudSelect T="string" @bind-Value="inventoryItem.Brand" Label="Marque">
+                    <MudSelectItem Value="@string.Empty">Choisir une marque</MudSelectItem>
                     @foreach (var brand in brands)
                     {
                         <MudSelectItem Value="@brand.Name">@brand.Name</MudSelectItem>
                     }
                 </MudSelect>
-                <MudTextField @bind-Value="inventoryItem.Model" Label="Model" />
-                <MudTextField @bind-Value="inventoryItem.SerialNumber" Label="Serial Number" />
-                <MudDatePicker @bind-Value="inventoryItem.RecoveryDate" Label="Recovery Date" />
-                <MudDatePicker @bind-Value="inventoryItem.VerificationDate" Label="Verification Date" />
-                <MudTextField @bind-Value="inventoryItem.VerifiedBy" Label="Verified By" />
+                <MudTextField @bind-Value="inventoryItem.Model" Label="Modèle" />
+                <MudTextField @bind-Value="inventoryItem.SerialNumber" Label="Numéro de série / Service tag" />
+                <MudDatePicker @bind-Value="inventoryItem.RecoveryDate" Label="Date de récupération" />
+                <MudDatePicker @bind-Value="inventoryItem.VerificationDate" Label="Date de vérification" />
+                <MudTextField @bind-Value="inventoryItem.VerifiedBy" Label="Vérifier par" />
                 <MudTextField @bind-Value="inventoryItem.Description" Label="Description" Lines="3" />
             </MudCardContent>
             <MudCardActions>
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Save</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Enregistrer</MudButton>
             </MudCardActions>
         </MudCard>
     </EditForm>

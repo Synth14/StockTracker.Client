@@ -15,32 +15,33 @@
     <DataAnnotationsValidator />
     <MudCard>
         <MudCardContent>
-            <MudSelect T="string" Label="Brand" @bind-Value="inventoryItem.Brand">
-                <MudSelectItem Value="@string.Empty">Select a brand...</MudSelectItem>
+            <MudSelect T="string" Label="Marque" @bind-Value="inventoryItem.Brand">
+                <MudSelectItem Value="@string.Empty">Choisir une marque</MudSelectItem>
                 @foreach (var brand in brands)
                 {
                     <MudSelectItem Value="@brand.Name">@brand.Name</MudSelectItem>
                 }
             </MudSelect>
-            <MudTextField @bind-Value="inventoryItem.Model" Label="Model" />
-            <MudTextField @bind-Value="inventoryItem.SerialNumber" Label="Serial Number" />
-            <MudDatePicker @bind-Value="inventoryItem.RecoveryDate" Label="Recovery Date" />
-            <MudTextField @bind-Value="inventoryItem.VerifiedBy" Label="Added By" />
+            <MudTextField @bind-Value="inventoryItem.Model" Label="Modèle" />
+            <MudTextField @bind-Value="inventoryItem.SerialNumber" Label="Numéro de série / Service Tag" />
+            <MudDatePicker @bind-Value="inventoryItem.RecoveryDate" Label="Date de récupération" />
+            <MudTextField @bind-Value="inventoryItem.VerifiedBy" Label="Ajouté par" />
             <MudTextField @bind-Value="inventoryItem.Description" Label="Description" Lines="3" />
         </MudCardContent>
         <MudCardActions>
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Save</MudButton>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Enregistrer</MudButton>
         </MudCardActions>
     </MudCard>
 </EditForm>
 
 @code {
-    private InventoryItem inventoryItem = new InventoryItem();
+    private InventoryItem inventoryItem = new InventoryItem() { RecoveryDate = DateTime.Today };
     private List<Brand> brands = new List<Brand>();
 
     protected override async Task OnParametersSetAsync()
     {
         brands = await _inventoryService.GetBrandsAsync();
+        inventoryItem.RecoveryDate = DateTime.Today;
     }
 
     private async Task HandleValidSubmit()

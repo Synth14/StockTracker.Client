@@ -15,7 +15,7 @@
         [Required(ErrorMessage = "Recovery Date is required")]
         public DateTime RecoveryDate { get; set; }
         [Required(ErrorMessage = "Verification Date is required")]
-        public DateTime VerificationDate { get; set; }
+        public DateTime? VerificationDate { get; set; }
 
         [Required(ErrorMessage = "VerifiedBy by is required")]
         public string VerifiedBy { get; set; }

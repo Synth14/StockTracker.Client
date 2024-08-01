@@ -6,102 +6,66 @@
 @using System.Text.Json
 @inject IInventoryService _inventoryService
 @inject NavigationManager NavigationManager
+@using MudBlazor
+@using System
 
-
-<h1>Edit Inventory Item</h1>
+<MudText Typo="Typo.h3" GutterBottom="true">Modifier le matériel</MudText>
 
 @if (inventoryItem == null)
 {
-    <p><em>Loading...</em></p>
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
 }
 else
 {
+    try
+    {
     <EditForm Model="@inventoryItem" OnValidSubmit="@HandleValidSubmit" FormName="editForm">
         <DataAnnotationsValidator />
-        <ValidationSummary />
-
-        <p>
-            <label for="brand">Brand: </label>
-            <InputSelect id="brand" class="form-control" @bind-Value="inventoryItem.Brand">
-                <option value="">Select a brand...</option>
-                @foreach (var brand in brands)
-                {
-                    <option value="@brand.Name">@brand.Name</option>
-                }
-            </InputSelect>
-            <ValidationMessage For="() => inventoryItem.Brand" />
-        </p>
-        <p>
-            <label for="model">Model: </label>
-            <InputText id="model" @bind-Value="inventoryItem.Model" />
-            <ValidationMessage For="() => inventoryItem.Model" />
-        </p>
-        <p>
-            <label for="serialNumber">Serial Number: </label>
-            <InputText id="serialNumber" @bind-Value="inventoryItem.SerialNumber" />
-            <ValidationMessage For="() => inventoryItem.SerialNumber" />
-        </p>
-        <p>
-            <label for="recoveryDate">Recovery Date: </label>
-            <InputDate id="recoveryDate" @bind-Value="inventoryItem.RecoveryDate" />
-            <ValidationMessage For="() => inventoryItem.RecoveryDate" />
-        </p>
-        <p>
-            <label for="verificationDate">Verification Date: </label>
-            <InputDate id="verificationDate" @bind-Value="inventoryItem.VerificationDate" />
-            <ValidationMessage For="() => inventoryItem.VerificationDate" />
-        </p>
-        <p>
-            <label for="verifiedBy">Verified By: </label>
-            <InputText id="verifiedBy" @bind-Value="inventoryItem.VerifiedBy" />
-            <ValidationMessage For="() => inventoryItem.VerifiedBy" />
-        </p>
-        <p>
-            <label for="description">Description: </label>
-            <InputText id="description" @bind-Value="inventoryItem.Description" />
-            <ValidationMessage For="() => inventoryItem.Description" />
-        </p>
-
-        <button type="submit" class="btn btn-primary">Save</button>
+        <MudCard>
+            <MudCardContent>
+                <MudSelect T="string" @bind-Value="inventoryItem.Brand" Label="Brand">
+                    <MudSelectItem Value="@string.Empty">Select a brand...</MudSelectItem>
+                    @foreach (var brand in brands)
+                    {
+                        <MudSelectItem Value="@brand.Name">@brand.Name</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudTextField @bind-Value="inventoryItem.Model" Label="Model" />
+                <MudTextField @bind-Value="inventoryItem.SerialNumber" Label="Serial Number" />
+                <MudDatePicker @bind-Value="inventoryItem.RecoveryDate" Label="Recovery Date" />
+                <MudDatePicker @bind-Value="inventoryItem.VerificationDate" Label="Verification Date" />
+                <MudTextField @bind-Value="inventoryItem.VerifiedBy" Label="Verified By" />
+                <MudTextField @bind-Value="inventoryItem.Description" Label="Description" Lines="3" />
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Save</MudButton>
+            </MudCardActions>
+        </MudCard>
     </EditForm>
 }
+    catch (Exception ex)
+    {
+        <MudAlert Severity="Severity.Error">
+            Une erreur s'est produite : @ex.Message
+        </MudAlert>
+    }
+    }
 
 @code {
     [Parameter] public int id { get; set; }
     private InventoryItem inventoryItem;
     private List<Brand> brands = new List<Brand>();
-    protected override async Task OnInitializedAsync()
+
+    protected override async Task OnParametersSetAsync()
     {
         brands = await _inventoryService.GetBrandsAsync();
         inventoryItem = await _inventoryService.GetInventoryItemAsync(id);
-    }
+        StateHasChanged();
 
+    }
     private async Task HandleValidSubmit()
     {
         await _inventoryService.UpdateInventoryItemAsync(id, inventoryItem);
         NavigationManager.NavigateTo("/");
-        // Create a patch document
-        // var patchDoc = new JsonPatchDocument<InventoryItem>();
-
-        // // // Add operations to the patch document
-        // patchDoc.Replace(e => e.Brand, inventoryItem.Brand);
-        // patchDoc.Replace(e => e.Model, inventoryItem.Model);
-        // patchDoc.Replace(e => e.SerialNumber, inventoryItem.SerialNumber);
-        // patchDoc.Replace(e => e.RecoveryDate, inventoryItem.RecoveryDate);
-        // patchDoc.Replace(e => e.VerificationDate, inventoryItem.VerificationDate);
-        // patchDoc.Replace(e => e.VerifiedBy, inventoryItem.VerifiedBy);
-        // patchDoc.Replace(e => e.Description, inventoryItem.Description);
-
-        // Console.WriteLine($"Patch Document: {JsonSerializer.Serialize(patchDoc)}");
-
-        // try
-        // {
-        //     await _inventoryService.PatchInventoryItemAsync(id, patchDoc);
-        //     NavigationManager.NavigateTo("/inventory");
-        // }
-        // catch (HttpRequestException ex)
-        // {
-        //     Console.WriteLine($"Error patching item: {ex.Message}");
-        // }
     }
 }

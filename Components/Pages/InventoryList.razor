@@ -4,50 +4,40 @@
 @using StockTracker.Client.Services
 @inject IInventoryService InventoryService
 @inject NavigationManager NavigationManager
-@* @rendermode InteractiveServer *@
 
-<h3>Inventory List</h3>
+<MudText Typo="Typo.h3">Inventory List</MudText>
 
 @if (inventoryItems == null)
 {
-    <p><em>Loading...</em></p>
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Brand</th>
-                <th>Model</th>
-                <th>Serial Number</th>
-                <th>Recovery Date</th>
-                <th>Verification Date</th>
-                <th>Verified By</th>
-                <th>Description</th>
-                <th>Actions</th>
-
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in inventoryItems)
-            {
-                <tr>
-                    <td>@item.Brand</td>
-                    <td>@item.Model</td>
-                    <td>@item.SerialNumber</td>
-                    <td>@item.RecoveryDate</td>
-                    <td>@item.VerificationDate</td>
-                    <td>@item.VerifiedBy</td>
-                    <td>@item.Description</td>
-
-                    <td>
-                        <button @onclick="async () => EditItem(item.Id)">Edit</button>
-                        <button @onclick="async () => await DeleteItem(item.Id)">Delete</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <MudTable Items="inventoryItems" Hover="true" Bordered="true" Striped="true">
+        <HeaderContent>
+            <MudTh>Brand</MudTh>
+            <MudTh>Model</MudTh>
+            <MudTh>Serial Number</MudTh>
+            <MudTh>Recovery Date</MudTh>
+            <MudTh>Verification Date</MudTh>
+            <MudTh>Verified By</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Brand">@context.Brand</MudTd>
+            <MudTd DataLabel="Model">@context.Model</MudTd>
+            <MudTd DataLabel="Serial Number">@context.SerialNumber</MudTd>
+            <MudTd DataLabel="Recovery Date">@context.RecoveryDate</MudTd>
+            <MudTd DataLabel="Verification Date">@context.VerificationDate?</MudTd>
+            <MudTd DataLabel="Verified By">@context.VerifiedBy</MudTd>
+            <MudTd DataLabel="Description">@context.Description</MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => EditItem(context.Id))">Edit</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(async () => await DeleteItem(context.Id))">Delete</MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
 }
 
 @code {

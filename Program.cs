@@ -1,5 +1,6 @@
 using StockTracker.Client.Services;
 using Microsoft.AspNetCore.Components.Authorization;
+using MudBlazor.Services;
 
 namespace StockTracker.Client
 {
@@ -20,8 +21,9 @@ namespace StockTracker.Client
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddHttpClient();
-
+            builder.Services.AddMudServices();
             builder.Services.AddOptions();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

@@ -47,6 +47,10 @@
         {
             return await _httpClient.GetFromJsonAsync<List<Brand>>("/api/brands");
         }
+        public async Task<List<Models.Type>> GetTypesAsync()
+        {
+            return await _httpClient.GetFromJsonAsync<List<Models.Type>>("/api/types");
+        }
 
     }
 }

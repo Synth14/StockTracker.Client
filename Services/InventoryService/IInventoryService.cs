@@ -9,6 +9,8 @@
         Task UpdateInventoryItemAsync(int id, InventoryItem item);
         Task PatchInventoryItemAsync(int id, JsonPatchDocument<InventoryItem> patchDoc);
         Task<List<Brand>> GetBrandsAsync();
+        Task<List<Models.Type>> GetTypesAsync();
+
 
         Task AddInventoryItemAsync(InventoryItem inventoryItem);
     }

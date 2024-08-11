@@ -17,6 +17,7 @@ else
         <HeaderContent>
             <MudTh>Marque</MudTh>
             <MudTh>Modèle</MudTh>
+            <MudTh>Type</MudTh>
             <MudTh>Numéro de série / Service Tag</MudTh>
             <MudTh>Date de récupération</MudTh>
             <MudTh>Date de vérification</MudTh>
@@ -27,6 +28,8 @@ else
         <RowTemplate>
             <MudTd DataLabel="Brand">@context.Brand</MudTd>
             <MudTd DataLabel="Model">@context.Model</MudTd>
+                <MudTd DataLabel="Model">@context.Type</MudTd>
+
             <MudTd DataLabel="Serial Number">@context.SerialNumber</MudTd>
             <MudTd DataLabel="Recovery Date">@context.RecoveryDate</MudTd>
             <MudTd DataLabel="Verification Date">@context.VerificationDate?</MudTd>

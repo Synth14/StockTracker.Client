@@ -5,6 +5,7 @@
 @using StockTracker.Client.Models
 @using StockTracker.Client.Services
 @using MudBlazor
+@inject ILogger<AddInventory> Logger
 @inject IInventoryService _inventoryService
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider _authenticationStateProvider
@@ -22,11 +23,20 @@
                     <MudSelectItem Value="@brand.Name">@brand.Name</MudSelectItem>
                 }
             </MudSelect>
+            <MudSelect T="string" Label="Type" @bind-Value="inventoryItem.Type">
+                <MudSelectItem Value="@string.Empty">Choisir un Type</MudSelectItem>
+                @foreach (var type in types)
+                {
+                    <MudSelectItem Value="@type.TypeName">@type.TypeName</MudSelectItem>
+                }
+            </MudSelect>
             <MudTextField @bind-Value="inventoryItem.Model" Label="Modèle" />
             <MudTextField @bind-Value="inventoryItem.SerialNumber" Label="Numéro de série / Service Tag" />
             <MudDatePicker @bind-Value="inventoryItem.RecoveryDate" Label="Date de récupération" />
             <MudTextField @bind-Value="inventoryItem.VerifiedBy" Label="Ajouté par" />
             <MudTextField @bind-Value="inventoryItem.Description" Label="Description" Lines="3" />
+            <InputDate @bind-Value="inventoryItem.VerificationDate" style="display: none;" />
+
         </MudCardContent>
         <MudCardActions>
             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Enregistrer</MudButton>
@@ -37,10 +47,16 @@
 @code {
     private InventoryItem inventoryItem = new InventoryItem() { RecoveryDate = DateTime.Today };
     private List<Brand> brands = new List<Brand>();
+    private List<Models.Type> types = new List<Models.Type>();
+
 
     protected override async Task OnParametersSetAsync()
     {
+        inventoryItem.VerificationDate = DateTime.Today;
+
         brands = await _inventoryService.GetBrandsAsync();
+        types = await _inventoryService.GetTypesAsync();
+
         inventoryItem.RecoveryDate = DateTime.Today;
     }
 
@@ -50,8 +66,13 @@
         NavigationManager.NavigateTo("/");
     }
 
-    public async Task HandleInvalidSubmit()
+    public async Task HandleInvalidSubmit(EditContext editContext)
     {
+        var validationMessages = editContext.GetValidationMessages();
+        foreach (var message in validationMessages)
+        {
+            Logger.LogWarning($"Validation error: {message}");
+        }
         StateHasChanged();
     }
 }

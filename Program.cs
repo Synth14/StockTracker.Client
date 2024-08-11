@@ -14,7 +14,7 @@ namespace StockTracker.Client
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
-            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:32770/") });
+            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:32771/") });
 
 
             builder.Services.AddScoped<IInventoryService, InventoryService>();

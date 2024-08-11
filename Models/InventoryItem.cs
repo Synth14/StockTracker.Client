@@ -5,7 +5,8 @@
         public int Id { get; set; }
         [Required(ErrorMessage = "Brand is required")]
         public string Brand { get; set; }
-
+        [Required(ErrorMessage = "Type is required")]
+        public string Type { get; set; }
         [Required(ErrorMessage = "Model is required")]
         public string Model { get; set; }
 

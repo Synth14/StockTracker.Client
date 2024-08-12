@@ -38,6 +38,14 @@ else
                             <MudSelectItem Value="@type.TypeName">@type.TypeName</MudSelectItem>
                         }
                     </MudSelect>
+                    <MudSelect T="State" Label="État" @bind-Value="inventoryItem.State">
+                        <MudSelectItem Value="@State.Reçu">Reçu</MudSelectItem>
+                        <MudSelectItem Value="@State.Vérifié">Vérifié</MudSelectItem>
+                        <MudSelectItem Value="@State.Enattente">En attente</MudSelectItem>
+                        <MudSelectItem Value="@State.Donné">Donné</MudSelectItem>
+                        <MudSelectItem Value="@State.Vendu">Vendu</MudSelectItem>
+                        <MudSelectItem Value="@State.Jeté">Jeté</MudSelectItem>
+                    </MudSelect>
                 <MudTextField @bind-Value="inventoryItem.SerialNumber" Label="Numéro de série / Service tag" />
                 <MudDatePicker @bind-Value="inventoryItem.RecoveryDate" Label="Date de récupération" />
                 <MudDatePicker @bind-Value="inventoryItem.VerificationDate" Label="Date de vérification" />
@@ -63,12 +71,22 @@ else
     private InventoryItem inventoryItem;
     private List<Brand> brands = new List<Brand>();
     private List<Models.Type> types = new List<Models.Type>();
+    private State? GetState => inventoryItem?.State;
+
+    private void SetState(State? value)
+    {
+        if (inventoryItem != null)
+        {
+            inventoryItem.State = value ?? State.Reçu; // Utilisez une valeur par défaut appropriée
+        }
+    }
 
     protected override async Task OnParametersSetAsync()
     {
         types = await _inventoryService.GetTypesAsync();
         brands = await _inventoryService.GetBrandsAsync();
         inventoryItem = await _inventoryService.GetInventoryItemAsync(id);
+        
         StateHasChanged();
 
     }

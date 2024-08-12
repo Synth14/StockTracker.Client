@@ -53,7 +53,7 @@
     protected override async Task OnParametersSetAsync()
     {
         inventoryItem.VerificationDate = DateTime.Today;
-
+        inventoryItem.State = State.Reçu;
         brands = await _inventoryService.GetBrandsAsync();
         types = await _inventoryService.GetTypesAsync();
 

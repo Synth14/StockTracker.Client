@@ -23,5 +23,6 @@
         
 
         public string Description { get; set; }
+        public State State { get; set; }
     }
 }

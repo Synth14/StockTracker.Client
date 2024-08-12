@@ -24,6 +24,7 @@ else
             <MudTh>Vérifié par</MudTh>
             <MudTh>Description</MudTh>
             <MudTh>Actions</MudTh>
+            <MudTh>State</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Brand">@context.Brand</MudTd>
@@ -34,7 +35,8 @@ else
             <MudTd DataLabel="Recovery Date">@context.RecoveryDate</MudTd>
             <MudTd DataLabel="Verification Date">@context.VerificationDate?</MudTd>
             <MudTd DataLabel="Verified By">@context.VerifiedBy</MudTd>
-            <MudTd DataLabel="Description">@context.Description</MudTd>
+                <MudTd DataLabel="Description">@context.Description</MudTd>
+                <MudTd DataLabel="État">@context.State</MudTd>
             <MudTd>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => EditItem(context.Id))">Modifier</MudButton>
                 <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(async () => await DeleteItem(context.Id))">Supprimer</MudButton>

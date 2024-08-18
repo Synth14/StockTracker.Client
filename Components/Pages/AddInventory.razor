@@ -14,6 +14,8 @@
 
 <EditForm Model="@inventoryItem" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit" FormName="AddInventory">
     <DataAnnotationsValidator />
+    <ValidationSummary />
+
     <MudCard>
         <MudCardContent>
             <MudSelect T="string" Label="Marque" @bind-Value="inventoryItem.Brand">

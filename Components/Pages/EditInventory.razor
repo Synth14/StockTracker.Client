@@ -21,6 +21,8 @@ else
     {
     <EditForm Model="@inventoryItem" OnValidSubmit="@HandleValidSubmit" FormName="editForm">
         <DataAnnotationsValidator />
+            <ValidationSummary />
+
         <MudCard>
             <MudCardContent>
                 <MudSelect T="string" @bind-Value="inventoryItem.Brand" Label="Marque">

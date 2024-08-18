@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Components
 @using StockTracker.Client.Models
 @using StockTracker.Client.Services
+@using System.Linq
 @inject IInventoryService InventoryService
 @inject NavigationManager NavigationManager
 
@@ -13,7 +14,31 @@
 }
 else
 {
-    <MudTable Items="inventoryItems" Hover="true" Bordered="true" Striped="true">
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="4">
+            <MudTextField @bind-Value="searchString" Placeholder="Rechercher..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudSelect T="string" Label="Type" @bind-Value="selectedType">
+                <MudSelectItem Value="@string.Empty">Tous</MudSelectItem>
+                @foreach (var type in inventoryItems.Select(i => i.Type).Distinct())
+                {
+                    <MudSelectItem Value="@type">@type</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudSelect T="State?" Label="État" @bind-Value="selectedState">
+                <MudSelectItem Value="@((State?)null)">Tous</MudSelectItem>
+                @foreach (State state in Enum.GetValues(typeof(State)))
+                {
+                    <MudSelectItem T="State?" Value="@state">@state.ToString()</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+    </MudGrid>
+
+    <MudTable Items="@FilteredItems" Hover="true" Bordered="true" Striped="true" Pagination="true" RowsPerPage="10">
         <HeaderContent>
             <MudTh>Marque</MudTh>
             <MudTh>Modèle</MudTh>
@@ -23,46 +48,58 @@ else
             <MudTh>Date de vérification</MudTh>
             <MudTh>Vérifié par</MudTh>
             <MudTh>Description</MudTh>
+            <MudTh>État</MudTh>
             <MudTh>Actions</MudTh>
-            <MudTh>State</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Brand">@context.Brand</MudTd>
             <MudTd DataLabel="Model">@context.Model</MudTd>
-                <MudTd DataLabel="Model">@context.Type</MudTd>
-
+            <MudTd DataLabel="Type">@context.Type</MudTd>
             <MudTd DataLabel="Serial Number">@context.SerialNumber</MudTd>
-            <MudTd DataLabel="Recovery Date">@context.RecoveryDate</MudTd>
-            <MudTd DataLabel="Verification Date">@context.VerificationDate?</MudTd>
+            <MudTd DataLabel="Recovery Date">@context.RecoveryDate.ToShortDateString()</MudTd>
+            <MudTd DataLabel="Verification Date">@(context.VerificationDate?.ToShortDateString() ?? "-")</MudTd>
             <MudTd DataLabel="Verified By">@context.VerifiedBy</MudTd>
-                <MudTd DataLabel="Description">@context.Description</MudTd>
-                <MudTd DataLabel="État">@context.State</MudTd>
+            <MudTd DataLabel="Description">@context.Description</MudTd>
+            <MudTd DataLabel="État">@context.State</MudTd>
             <MudTd>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => EditItem(context.Id))">Modifier</MudButton>
                 <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(async () => await DeleteItem(context.Id))">Supprimer</MudButton>
             </MudTd>
         </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
     </MudTable>
 }
 
 @code {
     private List<InventoryItem> inventoryItems;
+    private string searchString = "";
+    private string selectedType = "";
+    private State? selectedState = null;
 
     protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine("OnInitializedAsync called");
         inventoryItems = await InventoryService.GetInventoryItemsAsync();
     }
 
+    private IEnumerable<InventoryItem> FilteredItems => inventoryItems
+        .Where(i =>
+            (string.IsNullOrWhiteSpace(searchString) ||
+             i.Brand.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+             i.Model.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+             i.SerialNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrWhiteSpace(selectedType) || i.Type == selectedType) &&
+            (!selectedState.HasValue || i.State == selectedState.Value)
+        );
+
     private void EditItem(int id)
     {
-        Console.WriteLine($"EditItem called with id: {id}");
         NavigationManager.NavigateTo($"/editinventory/{id}");
     }
 
     private async Task DeleteItem(int id)
     {
-        Console.WriteLine($"DeleteItem called with id: {id}");
         await InventoryService.DeleteInventoryItemAsync(id);
         inventoryItems = await InventoryService.GetInventoryItemsAsync();
     }

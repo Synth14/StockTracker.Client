@@ -56,7 +56,7 @@ else
             <MudTd DataLabel="Model">@context.Model</MudTd>
             <MudTd DataLabel="Type">@context.Type</MudTd>
             <MudTd DataLabel="Serial Number">@context.SerialNumber</MudTd>
-            <MudTd DataLabel="Recovery Date">@context.RecoveryDate.ToShortDateString()</MudTd>
+            <MudTd DataLabel="Recovery Date">@(context.RecoveryDate?.ToShortDateString() ?? "-")</MudTd>
             <MudTd DataLabel="Verification Date">@(context.VerificationDate?.ToShortDateString() ?? "-")</MudTd>
             <MudTd DataLabel="Verified By">@context.VerifiedBy</MudTd>
             <MudTd DataLabel="Description">@context.Description</MudTd>
@@ -73,9 +73,9 @@ else
 }
 
 @code {
-    private List<InventoryItem> inventoryItems;
-    private string searchString = "";
-    private string selectedType = "";
+    private List<InventoryItem>? inventoryItems;
+    private string searchString = string.Empty;
+    private string selectedType = string.Empty;
     private State? selectedState = null;
 
     protected override async Task OnInitializedAsync()
@@ -83,10 +83,11 @@ else
         inventoryItems = await InventoryService.GetInventoryItemsAsync();
     }
 
-    private IEnumerable<InventoryItem> FilteredItems => inventoryItems
+    private IEnumerable<InventoryItem> FilteredItems => inventoryItems?
         .Where(i => SearchInAllFields(i, searchString) &&
                     (string.IsNullOrWhiteSpace(selectedType) || i.Type == selectedType) &&
-                    (!selectedState.HasValue || i.State == selectedState.Value));
+                    (!selectedState.HasValue || i.State == selectedState.Value))
+        ?? Enumerable.Empty<InventoryItem>();
 
     private bool SearchInAllFields(InventoryItem item, string searchTerm)
     {
@@ -94,14 +95,14 @@ else
             return true;
 
         searchTerm = searchTerm.ToLower();
-        return item.Brand.ToLower().Contains(searchTerm) ||
-               item.Model.ToLower().Contains(searchTerm) ||
-               item.Type.ToLower().Contains(searchTerm) ||
-               item.SerialNumber.ToLower().Contains(searchTerm) ||
-               item.RecoveryDate.ToString("d").Contains(searchTerm) ||
-               (item.VerificationDate?.ToString("d") ?? "").Contains(searchTerm) ||
-               (item.VerifiedBy?.ToLower() ?? "").Contains(searchTerm) ||
-               (item.Description?.ToLower() ?? "").Contains(searchTerm) ||
+        return (item.Brand ?? "").ToLower().Contains(searchTerm) ||
+               (item.Model ?? "").ToLower().Contains(searchTerm) ||
+               (item.Type ?? "").ToLower().Contains(searchTerm) ||
+               (item.SerialNumber ?? "").ToLower().Contains(searchTerm) ||
+                (item.RecoveryDate?.ToString("d") ?? "").Contains(searchTerm) ||
+                (item.VerificationDate?.ToString("d") ?? "").Contains(searchTerm) ||
+               (item.VerifiedBy ?? "").ToLower().Contains(searchTerm) ||
+               (item.Description ?? "").ToLower().Contains(searchTerm) ||
                item.State.ToString().ToLower().Contains(searchTerm);
     }
 
@@ -112,7 +113,15 @@ else
 
     private async Task DeleteItem(int id)
     {
-        await InventoryService.DeleteInventoryItemAsync(id);
-        inventoryItems = await InventoryService.GetInventoryItemsAsync();
+        var result = await InventoryService.DeleteInventoryItemAsync(id);
+        if (result.Success)
+        {
+            inventoryItems = await InventoryService.GetInventoryItemsAsync();
+            StateHasChanged();
+        }
+        else
+        {
+            // Gérer l'erreur, peut-être afficher un message à l'utilisateur
+        }
     }
 }

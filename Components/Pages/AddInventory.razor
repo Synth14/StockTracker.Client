@@ -34,6 +34,10 @@
             </MudSelect>
             <MudTextField @bind-Value="inventoryItem.Model" Label="Modèle" />
             <MudTextField @bind-Value="inventoryItem.SerialNumber" Label="Numéro de série / Service Tag" />
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Class="mt-3">@errorMessage</MudAlert>
+            }
             <MudDatePicker @bind-Value="inventoryItem.RecoveryDate" Label="Date de récupération" />
             <MudTextField @bind-Value="inventoryItem.VerifiedBy" Label="Ajouté par" />
             <MudTextField @bind-Value="inventoryItem.Description" Label="Description" Lines="3" />
@@ -46,11 +50,12 @@
     </MudCard>
 </EditForm>
 
+
 @code {
     private InventoryItem inventoryItem = new InventoryItem() { RecoveryDate = DateTime.Today };
     private List<Brand> brands = new List<Brand>();
     private List<Models.Type> types = new List<Models.Type>();
-
+    private string errorMessage;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -64,8 +69,16 @@
 
     private async Task HandleValidSubmit()
     {
-        await _inventoryService.AddInventoryItemAsync(inventoryItem);
-        NavigationManager.NavigateTo("/");
+        var result = await _inventoryService.AddInventoryItemAsync(inventoryItem);
+        if (result.Success)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            errorMessage = "Le numéro de série doit être unique";
+            StateHasChanged();
+        }
     }
 
     public async Task HandleInvalidSubmit(EditContext editContext)

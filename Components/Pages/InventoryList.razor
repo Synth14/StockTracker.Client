@@ -16,11 +16,11 @@ else
 {
     <MudGrid>
         <MudItem xs="12" sm="6" md="4">
-            <MudTextField @bind-Value="searchString" Placeholder="Rechercher dans tous les champs..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudTextField @bind-Value="searchString" Placeholder="Recherche" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </MudItem>
         <MudItem xs="12" sm="6" md="4">
             <MudSelect T="string" Label="Type" @bind-Value="selectedType">
-                <MudSelectItem Value="@string.Empty">Tous</MudSelectItem>
+                <MudSelectItem Value="@string.Empty"></MudSelectItem>
                 @foreach (var type in inventoryItems.Select(i => i.Type).Distinct())
                 {
                     <MudSelectItem Value="@type">@type</MudSelectItem>

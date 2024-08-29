@@ -10,3 +10,8 @@
 @using StockTracker.Client
 @using StockTracker.Client.Components
 @using MudBlazor
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Http.Extensions;
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider

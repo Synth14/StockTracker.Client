@@ -1,6 +1,4 @@
-﻿@using MudBlazor
-
-<MudThemeProvider/>
+﻿<MudThemeProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
@@ -20,8 +18,9 @@
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" />
-
+    <CascadingAuthenticationState>
+        <Routes @rendermode="InteractiveServer" />
+    </CascadingAuthenticationState>
     <script src="_framework/blazor.web.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
 

@@ -1,0 +1,7 @@
+﻿@using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+@code{
+    protected override void OnInitialized()
+    {
+        Navigation.NavigateTo($"/identity/account/login?redirectUri={Navigation.Uri}");
+    }
+}

@@ -1,13 +1,14 @@
 ﻿using StockTracker.Client.Tools;
+using System.Net.Http;
 using System.Reflection;
 
 public class InventoryService : IInventoryService
 {
     private readonly HttpClient _httpClient;
 
-    public InventoryService(HttpClient httpClient)
+    public InventoryService(IHttpClientFactory httpClientFactory)
     {
-        _httpClient = httpClient;
+        _httpClient = httpClientFactory.CreateClient("API"); 
     }
 
     public async Task<List<InventoryItem>> GetInventoryItemsAsync()

@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Logging;
 using System.Net.Http;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.JsonWebTokens;
+using StockTracker.Client.Services.Handler;
 
 namespace StockTracker.Client
 {
@@ -146,12 +147,14 @@ namespace StockTracker.Client
                 options.AddPolicy("InventoryUpdate", policy => policy.RequireClaim("scope", "inventory.update"));
                 options.AddPolicy("InventoryCreate", policy => policy.RequireClaim("scope", "inventory.create"));
             });
-
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddTransient<AuthenticationDelegatingHandler>();
             // Configure HttpClient for API
             builder.Services.AddHttpClient("API", client =>
             {
                 client.BaseAddress = new Uri("https://localhost:7141/");
-            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            }).AddHttpMessageHandler<AuthenticationDelegatingHandler>()
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
                 ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator,
                 SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13

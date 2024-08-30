@@ -4,10 +4,12 @@
 @using StockTracker.Client.Models
 @using StockTracker.Client.Services.InventoryService
 @using System.Text.Json
-@inject IInventoryService _inventoryService
-@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Components.Authorization
 @using MudBlazor
 @using System
+@inject IInventoryService _inventoryService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <MudText Typo="Typo.h3" GutterBottom="true">Modifier le matériel</MudText>
 
@@ -19,20 +21,20 @@ else
 {
     try
     {
-    <EditForm Model="@inventoryItem" OnValidSubmit="@HandleValidSubmit" FormName="editForm">
-        <DataAnnotationsValidator />
+        <EditForm Model="@inventoryItem" OnValidSubmit="@HandleValidSubmit" FormName="editForm">
+            <DataAnnotationsValidator />
             <ValidationSummary />
 
-        <MudCard>
-            <MudCardContent>
-                <MudSelect T="string" @bind-Value="inventoryItem.Brand" Label="Marque">
-                    <MudSelectItem Value="@string.Empty">Choisir une marque</MudSelectItem>
-                    @foreach (var brand in brands)
-                    {
-                        <MudSelectItem Value="@brand.Name">@brand.Name</MudSelectItem>
-                    }
-                </MudSelect>
-                <MudTextField @bind-Value="inventoryItem.Model" Label="Modèle" />
+            <MudCard>
+                <MudCardContent>
+                    <MudSelect T="string" @bind-Value="inventoryItem.Brand" Label="Marque">
+                        <MudSelectItem Value="@string.Empty">Choisir une marque</MudSelectItem>
+                        @foreach (var brand in brands)
+                        {
+                            <MudSelectItem Value="@brand.Name">@brand.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudTextField @bind-Value="inventoryItem.Model" Label="Modèle" />
                     <MudSelect T="string" @bind-Value="inventoryItem.Type" Label="Type">
                         <MudSelectItem Value="@string.Empty">Choisir un Type</MudSelectItem>
                         @foreach (var type in types)
@@ -48,25 +50,25 @@ else
                         <MudSelectItem Value="@State.Vendu">Vendu</MudSelectItem>
                         <MudSelectItem Value="@State.Jeté">Jeté</MudSelectItem>
                     </MudSelect>
-                <MudTextField @bind-Value="inventoryItem.SerialNumber" Label="Numéro de série / Service tag" />
+                    <MudTextField @bind-Value="inventoryItem.SerialNumber" Label="Numéro de série / Service tag" />
                     <MudDatePicker @bind-Date="inventoryItem.RecoveryDate" Label="Date de récupération" Required="true" />
                     <MudDatePicker @bind-Value="inventoryItem.VerificationDate" Label="Date de vérification" />
-                <MudTextField @bind-Value="inventoryItem.VerifiedBy" Label="Vérifié par" />
-                <MudTextField @bind-Value="inventoryItem.Description" Label="Description" Lines="3" />
-            </MudCardContent>
-            <MudCardActions>
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Enregistrer</MudButton>
-            </MudCardActions>
-        </MudCard>
-    </EditForm>
-}
+                    <MudTextField @bind-Value="inventoryItem.VerifiedBy" Label="Vérifié par" />
+                    <MudTextField @bind-Value="inventoryItem.Description" Label="Description" Lines="3" />
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Enregistrer</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </EditForm>
+    }
     catch (Exception ex)
     {
         <MudAlert Severity="Severity.Error">
             Une erreur s'est produite : @ex.Message
         </MudAlert>
     }
-    }
+}
 
 @code {
     [Parameter] public int id { get; set; }
@@ -85,15 +87,26 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+
         types = await _inventoryService.GetTypesAsync();
         brands = await _inventoryService.GetBrandsAsync();
         inventoryItem = await _inventoryService.GetInventoryItemAsync(id);
-        
-        StateHasChanged();
 
+        StateHasChanged();
     }
+
     private async Task HandleValidSubmit()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            var nameClaim = user.FindFirst(c => c.Type == "name"); 
+            if (nameClaim != null)
+            {
+                inventoryItem.VerifiedBy = nameClaim.Value;
+            }
+        }
         await _inventoryService.UpdateInventoryItemAsync(id, inventoryItem);
         NavigationManager.NavigateTo("/");
     }

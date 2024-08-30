@@ -61,6 +61,17 @@
     {
         inventoryItem.VerificationDate = DateTime.Today;
         inventoryItem.State = State.Reçu;
+        // Obtenir l'état d'authentification pour récupérer le nom de l'utilisateur
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            var nameClaim = user.FindFirst(c => c.Type == "name"); // Assurez-vous que ce type est correct selon votre configuration
+            if (nameClaim != null)
+            {
+                inventoryItem.VerifiedBy = nameClaim.Value;
+            }
+        }
         brands = await _inventoryService.GetBrandsAsync();
         types = await _inventoryService.GetTypesAsync();
 

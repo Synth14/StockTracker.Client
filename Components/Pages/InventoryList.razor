@@ -5,6 +5,8 @@
 @using System.Linq
 @inject IInventoryService InventoryService
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 
 <MudText Typo="Typo.h3">Inventaire</MudText>
 
@@ -80,6 +82,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         inventoryItems = await InventoryService.GetInventoryItemsAsync();
     }
 

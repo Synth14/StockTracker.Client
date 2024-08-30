@@ -1,53 +1,48 @@
 ﻿@inherits LayoutComponentBase
-
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 
 <MudThemeProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
-<MudPopoverProvider />
+<MudPopoverProvider /> @* Ajoutez cette ligne *@
 
-<AuthorizeView>
-    <Authorized>
-        <MudLayout>
-            <MudAppBar Elevation="1">
-                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-                <MudSpacer />
-            </MudAppBar>
-            <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
-                <MudDrawerHeader>
-                    <MudText Typo="Typo.h5">
-                        StockTracker
-                    </MudText>
-                </MudDrawerHeader>
-                <NavMenu />
-            </MudDrawer>
-            <MudMainContent>
-                <MudContainer MaxWidth="MaxWidth.Large" Class="my-16 pt-16">
-                    @Body
-                </MudContainer>
-            </MudMainContent>
-        </MudLayout>
-    </Authorized>
-    <NotAuthorized>
-        @if (context.User.Identity?.IsAuthenticated != true)
-        {
-            <RedirectToLogin />
-        }
-        else
-        {
-            <h1>Vous n'êtes pas autorisé à accéder à cette page</h1>
-        }
-    </NotAuthorized>
-</AuthorizeView>
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudSpacer />
+        <AuthorizeView>
+            <Authorized>
+                <MudText Typo="Typo.body1" Class="mr-4">Connecté en tant que : @context.User.FindFirst(c => c.Type == "name")?.Value</MudText>
+                <MudButton Color="Color.Inherit" OnClick="Logout">Se déconnecter</MudButton>
+            </Authorized>
+        </AuthorizeView>
+    </MudAppBar>
 
-<MudAlert Severity="Severity.Error" Class="mud-alert-positioned" Style="display:none;" id="blazor-error-ui">
-    An unhandled error has occurred.
-</MudAlert>
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h5">StockTracker</MudText>
+        </MudDrawerHeader>
+        <NavMenu />
+    </MudDrawer>
+
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="my-16 pt-16">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
 
 @code {
     bool _drawerOpen = true;
+
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+    private void Logout()
+    {
+        NavigationManager.NavigateTo("authentication/logout", true);
     }
 }

@@ -1,0 +1,28 @@
+﻿@page "/authentication/logout"
+@using StockTracker.Client.Services.AuthService
+@inject NavigationManager NavigationManager
+@inject IAuthService AuthService
+@inject IConfiguration Configuration
+
+@code {
+    private bool isLogoutInitiated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!isLogoutInitiated)
+        {
+            isLogoutInitiated = true;
+
+            await AuthService.SignOutAsync();
+
+            // Déconnexion côté IdentityServer
+            var authServerUrl = Configuration["OpenIdConnect:Authority"];
+            var clientId = Configuration["OpenIdConnect:ClientId"];
+            var returnUrl = NavigationManager.BaseUri;
+
+            var logoutUrl = $"{authServerUrl}/connect/endsession?client_id={clientId}&post_logout_redirect_uri={Uri.EscapeDataString(returnUrl)}";
+
+            NavigationManager.NavigateTo(logoutUrl, forceLoad: true);
+        }
+    }
+}

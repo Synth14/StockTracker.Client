@@ -5,6 +5,7 @@
 @using StockTracker.Client.Models
 @using StockTracker.Client.Services
 @using MudBlazor
+@using System.Text.Json;
 @inject ILogger<AddInventory> Logger
 @inject IInventoryService _inventoryService
 @inject NavigationManager NavigationManager
@@ -61,12 +62,11 @@
     {
         inventoryItem.VerificationDate = DateTime.Today;
         inventoryItem.State = State.Reçu;
-        // Obtenir l'état d'authentification pour récupérer le nom de l'utilisateur
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         if (user.Identity.IsAuthenticated)
         {
-            var nameClaim = user.FindFirst(c => c.Type == "name"); // Assurez-vous que ce type est correct selon votre configuration
+            var nameClaim = user.FindFirst(c => c.Type == "name");
             if (nameClaim != null)
             {
                 inventoryItem.VerifiedBy = nameClaim.Value;
@@ -87,9 +87,23 @@
         }
         else
         {
-            errorMessage = "Le numéro de série doit être unique";
+            var errorObject = JsonSerializer.Deserialize<ErrorResponse>(result.ErrorMessage);
+
+            if ((errorObject?.Errors?.ContainsKey("Description") ?? false))
+            {
+                // Extraire spécifiquement l'erreur de Description
+                errorMessage = string.Join(", ", errorObject.Errors["Description"]);
+            }
+            else
+            {
+                errorMessage = result.ErrorMessage;
+            }
             StateHasChanged();
         }
+    }
+    private class ErrorResponse
+    {
+        public Dictionary<string, string[]> Errors { get; set; }
     }
 
     public async Task HandleInvalidSubmit(EditContext editContext)

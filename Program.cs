@@ -1,21 +1,19 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using StockTracker.Client.Services;
-using MudBlazor.Services;
-using System.Security.Authentication;
-using Microsoft.IdentityModel.Logging;
-using System.Net.Http;
-using Microsoft.IdentityModel.Protocols;
-using Microsoft.IdentityModel.JsonWebTokens;
-using StockTracker.Client.Services.Handler;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
-using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
+using MudBlazor.Services;
 using StockTracker.Client.Services.AuthService;
+using StockTracker.Client.Services.Handler;
+using StockTracker.Client.Services.TokenService;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Authentication;
+using System.Security.Claims;
 
 namespace StockTracker.Client
 {
@@ -30,6 +28,8 @@ namespace StockTracker.Client
 
             builder.Services.AddAuthorizationCore();
             builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+            builder.Services.AddScoped<ITokenService, Services.TokenService.TokenService>();
+
             // Configure logging
             builder.Logging.ClearProviders();
             builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
@@ -52,6 +52,7 @@ namespace StockTracker.Client
              {
                  options.Authority = configuration.GetSection("OpenIdConnect:Authority").Value;
                  options.ClientId = configuration.GetSection("OpenIdConnect:ClientId").Value; 
+
                  options.ResponseType = OpenIdConnectResponseType.Code;
                  options.ResponseMode = OpenIdConnectResponseMode.FormPost;
                  options.SaveTokens = true;
@@ -103,21 +104,49 @@ namespace StockTracker.Client
                      },
                      OnTokenValidated = async context =>
                      {
+                         var tokenService = context.HttpContext.RequestServices.GetRequiredService<ITokenService>();
+
+                         // Vérification essentielle pour .NET 8
                          if (context.SecurityToken is SecurityToken securityToken)
                          {
                              Console.WriteLine($"Token type: {securityToken.GetType().Name}");
                              if (securityToken is JsonWebToken jsonWebToken)
                              {
                                  Console.WriteLine($"Token claims: {string.Join(", ", jsonWebToken.Claims.Select(c => $"{c.Type}={c.Value}"))}");
+                                 // Utilisez jsonWebToken pour extraire les informations nécessaires
+                                 var accessToken = context.TokenEndpointResponse.AccessToken;
+                                 var refreshToken = context.TokenEndpointResponse.RefreshToken;
+                                 var expiresAt = DateTime.UtcNow.AddSeconds(jsonWebToken.ValidTo.Subtract(DateTime.UtcNow).TotalSeconds);
+
+                                 await tokenService.SaveTokensAsync(accessToken, refreshToken, expiresAt);
+
+                                 var identity = (ClaimsIdentity)context.Principal.Identity;
+                                 foreach (var claim in jsonWebToken.Claims)
+                                 {
+                                     identity.AddClaim(new Claim(claim.Type, claim.Value));
+                                 }
                              }
                              else if (securityToken is JwtSecurityToken jwtSecurityToken)
                              {
                                  Console.WriteLine($"Token claims: {string.Join(", ", jwtSecurityToken.Claims.Select(c => $"{c.Type}={c.Value}"))}");
+                                 // Utilisez jwtSecurityToken pour extraire les informations nécessaires
+                                 var accessToken = context.TokenEndpointResponse.AccessToken;
+                                 var refreshToken = context.TokenEndpointResponse.RefreshToken;
+                                 var expiresAt = DateTime.UtcNow.AddSeconds(jwtSecurityToken.ValidTo.Subtract(DateTime.UtcNow).TotalSeconds);
+
+                                 await tokenService.SaveTokensAsync(accessToken, refreshToken, expiresAt);
+
+                                 var identity = (ClaimsIdentity)context.Principal.Identity;
+                                 foreach (var claim in jwtSecurityToken.Claims)
+                                 {
+                                     identity.AddClaim(new Claim(claim.Type, claim.Value));
+                                 }
                              }
                          }
                          else
                          {
                              Console.WriteLine($"Unexpected token type: {context.SecurityToken?.GetType().Name ?? "null"}");
+                             // Gérez ce cas inattendu, peut-être en lançant une exception ou en journalisant l'erreur
                          }
                      },
                      OnTokenResponseReceived = context =>

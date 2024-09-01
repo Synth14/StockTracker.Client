@@ -94,7 +94,7 @@ namespace StockTracker.Client
                      ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
                  });
                  options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
-                     "https://localhost:7031/.well-known/openid-configuration",
+                     configuration.GetSection("OpenIdConnect:Well-Known").Value,
                      new OpenIdConnectConfigurationRetriever(),
                      new HttpDocumentRetriever(httpClient) { RequireHttps = false }
                  );

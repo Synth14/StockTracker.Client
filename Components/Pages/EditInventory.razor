@@ -42,10 +42,10 @@ else
                             <MudSelectItem Value="@type.TypeName">@type.TypeName</MudSelectItem>
                         }
                     </MudSelect>
-                    <MudSelect T="State" Label="État" @bind-Value="inventoryItem.State">
+                  <MudSelect T="State" Label="État" @bind-Value="inventoryItem.State">
                         <MudSelectItem Value="@State.Reçu">Reçu</MudSelectItem>
                         <MudSelectItem Value="@State.Vérifié">Vérifié</MudSelectItem>
-                        <MudSelectItem Value="@State.Enattente">En attente</MudSelectItem>
+                        <MudSelectItem Value="@State.Enattente" ></MudSelectItem>
                         <MudSelectItem Value="@State.Donné">Donné</MudSelectItem>
                         <MudSelectItem Value="@State.Vendu">Vendu</MudSelectItem>
                         <MudSelectItem Value="@State.Jeté">Jeté</MudSelectItem>
@@ -94,7 +94,6 @@ else
 
         StateHasChanged();
     }
-
     private async Task HandleValidSubmit()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();

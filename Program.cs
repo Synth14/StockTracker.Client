@@ -45,6 +45,7 @@ namespace StockTracker.Client
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                options.DefaultSignOutScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
             .AddCookie(options =>
             {

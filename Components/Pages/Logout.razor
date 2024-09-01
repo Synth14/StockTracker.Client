@@ -20,7 +20,7 @@
             var clientId = Configuration["OpenIdConnect:ClientId"];
             var returnUrl = NavigationManager.BaseUri;
 
-            var logoutUrl = $"{authServerUrl}/connect/endsession?client_id={clientId}&post_logout_redirect_uri={Uri.EscapeDataString(returnUrl)}";
+            var logoutUrl = $"{authServerUrl}/connect/endsession?client_id={clientId}&post_logout_redirect_uri={Uri.EscapeDataString(returnUrl)}&id_token_hint=";
 
             NavigationManager.NavigateTo(logoutUrl, forceLoad: true);
         }

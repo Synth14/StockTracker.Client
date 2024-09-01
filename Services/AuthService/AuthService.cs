@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace StockTracker.Client.Services.AuthService
 {
@@ -15,6 +16,8 @@ namespace StockTracker.Client.Services.AuthService
         public async Task SignOutAsync()
         {
             await _httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await _httpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
         }
     }
 }

@@ -1,10 +1,10 @@
 {
   "profiles": {
-    "https": {
+    "http": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:8433",
+      "applicationUrl": "http://localhost:8433",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

@@ -9,8 +9,10 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using MudBlazor.Services;
+using StockTracker.Client.Models.Settings;
 using StockTracker.Client.Services;
 using StockTracker.Client.Services.AuthService;
+using StockTracker.Client.Tools.Extensions;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Authentication;
 using System.Security.Claims;
@@ -23,7 +25,13 @@ namespace StockTracker.Client
         {
 
             var builder = WebApplication.CreateBuilder(args);
-            var configuration = builder.Configuration;
+            builder.Configuration
+                .SetBasePath(builder.Environment.ContentRootPath)
+                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
+
+            builder.Services.ConfigureAppSettings(builder.Configuration);
+            var appSettings = builder.Services.BuildServiceProvider().GetRequiredService<AppSettings>();
 
 
             builder.Services.AddAuthorizationCore();
@@ -60,20 +68,20 @@ namespace StockTracker.Client
             })
              .AddOpenIdConnect(options =>
              {
-                 options.Authority = configuration.GetSection("OpenIdConnect:Authority").Value;
-                 options.ClientId = configuration.GetSection("OpenIdConnect:ClientId").Value;
+                 options.Authority = appSettings.OIDC.Authority;
+                 options.ClientId = appSettings.OIDC.ClientId;
 
                  options.ResponseType = OpenIdConnectResponseType.Code;
                  options.ResponseMode = OpenIdConnectResponseMode.FormPost;
                  options.SaveTokens = true;
                  options.GetClaimsFromUserInfoEndpoint = true;
-                 options.RequireHttpsMetadata = false; 
+                 options.RequireHttpsMetadata = false;
                  options.UsePkce = true;
                  options.CallbackPath = "/signin-oidc";
                  options.SignedOutCallbackPath = "/signout-callback-oidc";
                  options.RefreshInterval = TimeSpan.FromMinutes(30);
                  options.Scope.Clear();
-                 foreach (var scope in configuration.GetSection("OpenIdConnect:Scopes").Get<List<string>>())
+                 foreach (var scope in appSettings.OIDC.Scopes.ToList())
                  {
                      options.Scope.Add(scope);
                  }
@@ -82,7 +90,7 @@ namespace StockTracker.Client
                  {
                      ValidateIssuerSigningKey = true,
                      ValidateIssuer = true,
-                     ValidIssuer = configuration.GetSection("OpenIdConnect:Authority").Value,
+                     ValidIssuer = appSettings.OIDC.Authority,
                      ValidateAudience = false,
                      ValidateLifetime = true,
                      ClockSkew = TimeSpan.Zero
@@ -94,8 +102,8 @@ namespace StockTracker.Client
                      ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
                  });
                  options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
-                     configuration.GetSection("OpenIdConnect:Well-Known").Value,
-                     new OpenIdConnectConfigurationRetriever(),
+                    appSettings.OIDC.WellKnown,
+                      new OpenIdConnectConfigurationRetriever(),
                      new HttpDocumentRetriever(httpClient) { RequireHttps = false }
                  );
 
@@ -179,7 +187,10 @@ namespace StockTracker.Client
                      }
                  };
              });
-
+            builder.WebHost.UseKestrel(options =>
+            {
+                options.ListenAnyIP(8433);
+            });
             // Configure Authorization
             builder.Services.AddAuthorization(options =>
             {
@@ -195,7 +206,7 @@ namespace StockTracker.Client
             // Configure HttpClient for API
             builder.Services.AddHttpClient("API", client =>
             {
-                client.BaseAddress = new Uri(configuration.GetSection("StockTracker.API:BaseURL").Value);
+                client.BaseAddress = new Uri(appSettings.StockTrackerAPI.BaseURL);
             })
             .AddHttpMessageHandler<AuthenticationDelegatingHandler>()
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
@@ -212,7 +223,7 @@ namespace StockTracker.Client
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowSpecificOrigin",
-                    builder => builder.WithOrigins(configuration.GetSection("StockTracker.API:BaseURL").Value)
+                    builder => builder.WithOrigins(appSettings.StockTrackerAPI.BaseURL)
                                       .AllowAnyHeader()
                                       .AllowAnyMethod());
             });
@@ -227,10 +238,8 @@ namespace StockTracker.Client
             else
             {
                 app.UseExceptionHandler("/Error");
-                app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCors("AllowSpecificOrigin");
 

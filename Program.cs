@@ -189,7 +189,8 @@ namespace StockTracker.Client
              });
             builder.WebHost.UseKestrel(options =>
             {
-                options.ListenAnyIP(8433);
+                options.ListenAnyIP(8434);
+                options.ListenAnyIP(8433, listenOptions => listenOptions.UseHttps());
             });
             // Configure Authorization
             builder.Services.AddAuthorization(options =>
@@ -242,7 +243,7 @@ namespace StockTracker.Client
 
             app.UseStaticFiles();
             app.UseCors("AllowSpecificOrigin");
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseAntiforgery();

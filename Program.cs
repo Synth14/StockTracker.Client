@@ -242,7 +242,7 @@ namespace StockTracker.Client
 
             app.UseStaticFiles();
             app.UseCors("AllowSpecificOrigin");
-
+            app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseAntiforgery();

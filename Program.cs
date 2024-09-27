@@ -235,7 +235,15 @@ namespace StockTracker.Client
 
             var app = builder.Build();
             app.UseForwardedHeaders();
-
+            app.Use(async (context, next) =>
+            {
+                var headers = context.Request.Headers;
+                // Log les headers pertinents
+                Console.WriteLine($"X-Forwarded-Proto: {headers["X-Forwarded-Proto"]}");
+                Console.WriteLine($"X-Forwarded-Host: {headers["X-Forwarded-Host"]}");
+                Console.WriteLine($"Scheme: {context.Request.Scheme}");
+                await next.Invoke();
+            });
             // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())
             {

@@ -109,7 +109,7 @@ namespace StockTracker.Client
                  options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                     appSettings.OIDC.WellKnown,
                       new OpenIdConnectConfigurationRetriever(),
-                     new HttpDocumentRetriever(httpClient) { RequireHttps = false }
+                     new HttpDocumentRetriever(httpClient) { RequireHttps = true }
                  );
 
                  options.Events = new OpenIdConnectEvents

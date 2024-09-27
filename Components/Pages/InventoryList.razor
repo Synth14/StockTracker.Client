@@ -58,8 +58,8 @@ else
             <MudTd DataLabel="Model">@context.Model</MudTd>
             <MudTd DataLabel="Type">@context.Type</MudTd>
             <MudTd DataLabel="Serial Number">@context.SerialNumber</MudTd>
-            <MudTd DataLabel="Recovery Date">@(context.RecoveryDate?.ToShortDateString() ?? "-")</MudTd>
-            <MudTd DataLabel="Verification Date">@(context.VerificationDate?.ToShortDateString() ?? "-")</MudTd>
+                <MudTd DataLabel="Recovery Date">@(context.RecoveryDate?.ToString("dd/MM/yyyy") ?? "-")</MudTd>
+                <MudTd DataLabel="Verification Date">@(context.VerificationDate?.ToString("dd/MM/yyyy") ?? "-")</MudTd>
             <MudTd DataLabel="Verified By">@context.VerifiedBy</MudTd>
             <MudTd DataLabel="Description">@context.Description</MudTd>
             <MudTd DataLabel="État">@context.State</MudTd>

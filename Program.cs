@@ -75,7 +75,7 @@ namespace StockTracker.Client
                  options.ResponseMode = OpenIdConnectResponseMode.FormPost;
                  options.SaveTokens = true;
                  options.GetClaimsFromUserInfoEndpoint = true;
-                 options.RequireHttpsMetadata = false;
+                 options.RequireHttpsMetadata = true;
                  options.UsePkce = true;
                  options.CallbackPath = "/signin-oidc";
                  options.SignedOutCallbackPath = "/signout-callback-oidc";
@@ -189,8 +189,7 @@ namespace StockTracker.Client
              });
             builder.WebHost.UseKestrel(options =>
             {
-                options.ListenAnyIP(8434);
-                options.ListenAnyIP(8433, listenOptions => listenOptions.UseHttps());
+                options.ListenAnyIP(8433);
             });
             // Configure Authorization
             builder.Services.AddAuthorization(options =>

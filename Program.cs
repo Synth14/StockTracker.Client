@@ -38,6 +38,8 @@ namespace StockTracker.Client
             {
                 options.ForwardedHeaders =
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
             });
             builder.Services.AddAuthorizationCore();
             builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
@@ -235,6 +237,15 @@ namespace StockTracker.Client
 
             var app = builder.Build();
             app.UseForwardedHeaders();
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Headers["X-Forwarded-Proto"] == "https")
+                {
+                    context.Request.Scheme = "https";
+                }
+                await next();
+            });
+
             app.Use(async (context, next) =>
             {
                 var headers = context.Request.Headers;

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
@@ -33,7 +34,11 @@ namespace StockTracker.Client
             builder.Services.ConfigureAppSettings(builder.Configuration);
             var appSettings = builder.Services.BuildServiceProvider().GetRequiredService<AppSettings>();
 
-
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
             builder.Services.AddAuthorizationCore();
             builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
             builder.Services.AddSingleton<CookieOidcRefresher>();
@@ -229,6 +234,8 @@ namespace StockTracker.Client
             });
 
             var app = builder.Build();
+            app.UseForwardedHeaders();
+
             // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())
             {

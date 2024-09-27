@@ -3,7 +3,7 @@
 @inject NavigationManager NavigationManager
 @inject IAuthService AuthService
 @inject IConfiguration Configuration
-
+@inject StockTracker.Client.Models.Settings.AppSettings appSettings
 @code {
     private bool isLogoutInitiated;
 
@@ -16,8 +16,8 @@
             await AuthService.SignOutAsync();
 
             // Déconnexion côté IdentityServer
-            var authServerUrl = Configuration["OpenIdConnect:Authority"];
-            var clientId = Configuration["OpenIdConnect:ClientId"];
+            var authServerUrl = appSettings.OIDC.Authority;
+            var clientId = appSettings.OIDC.ClientId;
             var returnUrl = NavigationManager.BaseUri;
 
             var logoutUrl = $"{authServerUrl}/connect/endsession?client_id={clientId}&post_logout_redirect_uri={Uri.EscapeDataString(returnUrl)}&id_token_hint=";

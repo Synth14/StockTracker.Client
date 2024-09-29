@@ -1,0 +1,61 @@
+﻿@page "/vieworder/{id:int}"
+@using Microsoft.AspNetCore.Components
+@using StockTracker.Client.Models
+@using StockTracker.Client.Services
+@inject IOrderService OrderService
+@inject NavigationManager NavigationManager
+
+<MudText Typo="Typo.h3" GutterBottom="true">Détails de la commande</MudText>
+
+@if (order == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudCard>
+        <MudCardContent>
+            <MudText Typo="Typo.h5">Informations générales</MudText>
+            <MudText><strong>ID de la commande:</strong> @order.Id</MudText>
+                <MudText><strong>Acheteur/Preneur:</strong> @order.BuyerName</MudText>
+                <MudText><strong>Date de la commande:</strong> @order.Date.ToString("dd/MM/yyyy HH:mm")</MudText>
+                <MudText><strong>Créé par:</strong> @order.CreatedBy</MudText>
+
+                <MudDivider Class="my-6" />
+
+                <MudText Typo="Typo.h5">Articles de la commande</MudText>
+                <MudTable Items="@order.Items" Hover="true" Bordered="true" Striped="true">
+                    <HeaderContent>
+                        <MudTh>ID</MudTh>
+                        <MudTh>Marque</MudTh>
+                        <MudTh>Modèle</MudTh>
+                        <MudTh>Type</MudTh>
+                        <MudTh>Numéro de série</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="ID">@context.Id</MudTd>
+                        <MudTd DataLabel="Marque">@context.Brand</MudTd>
+                        <MudTd DataLabel="Modèle">@context.Model</MudTd>
+                        <MudTd DataLabel="Type">@context.Type</MudTd>
+                        <MudTd DataLabel="Numéro de série">@context.SerialNumber</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigationManager.NavigateTo($"/editorder/{order.Id}"))">Modifier</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/orders"))">Retour à la liste</MudButton>
+            </MudCardActions>
+        </MudCard>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Order order;
+
+    protected override async Task OnInitializedAsync()
+    {
+        order = await OrderService.GetOrderAsync(Id);
+    }
+}

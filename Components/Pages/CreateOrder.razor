@@ -1,0 +1,138 @@
+﻿@page "/createorder"
+@using Microsoft.AspNetCore.Components
+@using StockTracker.Client.Models
+@using StockTracker.Client.Services
+@using StockTracker.Client.Services.OrderService
+@inject IInventoryService InventoryService
+@inject IOrderService OrderService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h3" GutterBottom="true">Créer une commande</MudText>
+
+<MudCard>
+    <MudCardContent>
+        <MudTextField @bind-Value="buyerName" Label="Nom de l'acheteur/preneur" Required="true" />
+
+        <MudTextField @bind-Value="searchString" Label="Rechercher un article"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                      OnKeyUp="@SearchItems" />
+
+        @if (searchResults != null && searchResults.Any())
+        {
+            <MudTable Items="@searchResults" Hover="true" Dense="true">
+                <HeaderContent>
+                    <MudTh>Marque</MudTh>
+                    <MudTh>Modèle</MudTh>
+                    <MudTh>Type</MudTh>
+                    <MudTh>Action</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Marque">@context.Brand</MudTd>
+                        <MudTd DataLabel="Modèle">@context.Model</MudTd>
+                        <MudTd DataLabel="Type">@context.Type</MudTd>
+                        <MudTd>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                       OnClick="@(() => AddItemToOrder(context))">Ajouter</MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+        }
+
+        <MudDivider Class="my-6" />
+
+        <MudText Typo="Typo.h5">Articles dans la commande</MudText>
+        @if (selectedItems.Any())
+        {
+            <MudTable Items="@selectedItems" Hover="true" Dense="true">
+                <HeaderContent>
+                    <MudTh>Marque</MudTh>
+                    <MudTh>Modèle</MudTh>
+                    <MudTh>Type</MudTh>
+                    <MudTh>Action</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Marque">@context.Brand</MudTd>
+                        <MudTd DataLabel="Modèle">@context.Model</MudTd>
+                        <MudTd DataLabel="Type">@context.Type</MudTd>
+                        <MudTd>
+                            <MudButton Variant="Variant.Filled" Color="Color.Error"
+                                       OnClick="@(() => RemoveItemFromOrder(context))">Retirer</MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+        }
+        else
+        {
+            <MudText>Aucun article sélectionné</MudText>
+        }
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@SaveOrder"
+                   Disabled="@(!CanSaveOrder())">Enregistrer la commande</MudButton>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    private string buyerName = string.Empty;
+    private string searchString = string.Empty;
+    private List<InventoryItem> searchResults = new List<InventoryItem>();
+    private List<InventoryItem> selectedItems = new List<InventoryItem>();
+
+    private async Task SearchItems()
+    {
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            var allItems = await InventoryService.GetInventoryItemsAsync();
+            searchResults = allItems.Where(i =>
+                i.Brand.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                i.Model.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                i.Type.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+        }
+        else
+        {
+            searchResults.Clear();
+        }
+    }
+
+    private void AddItemToOrder(InventoryItem item)
+    {
+        if (!selectedItems.Contains(item))
+        {
+            selectedItems.Add(item);
+            searchResults.Remove(item);
+        }
+    }
+
+    private void RemoveItemFromOrder(InventoryItem item)
+    {
+        selectedItems.Remove(item);
+    }
+
+    private bool CanSaveOrder()
+    {
+        return !string.IsNullOrWhiteSpace(buyerName) && selectedItems.Any();
+    }
+
+    private async Task SaveOrder()
+    {
+        var order = new Order
+            {
+                BuyerName = buyerName,
+                Date = DateTime.Now,
+                Items = selectedItems
+            };
+
+        var result = await OrderService.CreateOrderAsync(order);
+        if (result.Success)
+        {
+            Snackbar.Add("Commande créée avec succès", Severity.Success);
+            NavigationManager.NavigateTo("/orders");
+        }
+        else
+        {
+            Snackbar.Add("Erreur lors de la création de la commande", Severity.Error);
+        }
+    }
+}

@@ -13,6 +13,7 @@ using MudBlazor.Services;
 using StockTracker.Client.Models.Settings;
 using StockTracker.Client.Services;
 using StockTracker.Client.Services.AuthService;
+using StockTracker.Client.Services.OrderService;
 using StockTracker.Client.Tools.Extensions;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Authentication;
@@ -43,6 +44,7 @@ namespace StockTracker.Client
             });
             builder.Services.AddAuthorizationCore();
             builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddSingleton<CookieOidcRefresher>();
             // Configure logging
             builder.Logging.ClearProviders();
@@ -201,10 +203,15 @@ namespace StockTracker.Client
             // Configure Authorization
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("InventoryRead", policy => policy.RequireClaim("scope", "inventory.read"));
+                options.AddPolicy("InventoryRead",   policy => policy.RequireClaim("scope", "inventory.read"));
                 options.AddPolicy("InventoryDelete", policy => policy.RequireClaim("scope", "inventory.delete"));
                 options.AddPolicy("InventoryUpdate", policy => policy.RequireClaim("scope", "inventory.update"));
                 options.AddPolicy("InventoryCreate", policy => policy.RequireClaim("scope", "inventory.create"));
+
+                options.AddPolicy("OrderRead",   policy => policy.RequireClaim("scope", "order.read"));
+                options.AddPolicy("OrderDelete", policy => policy.RequireClaim("scope", "order.delete"));
+                options.AddPolicy("OrderUpdate", policy => policy.RequireClaim("scope", "order.update"));
+                options.AddPolicy("OrderCreate", policy => policy.RequireClaim("scope", "order.create"));
             });
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddTransient<AuthenticationDelegatingHandler>();

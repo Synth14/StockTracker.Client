@@ -1,0 +1,97 @@
+﻿@page "/orders"
+@using Microsoft.AspNetCore.Components
+@using StockTracker.Client.Models
+@using StockTracker.Client.Services
+@using StockTracker.Client.Services.OrderService
+@inject IOrderService OrderService
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h3" GutterBottom="true">Liste des commandes</MudText>
+
+@if (orders == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudTable Items="@orders" Hover="true" Bordered="true" Striped="true">
+        <HeaderContent>
+            <MudTh>ID</MudTh>
+            <MudTh>Acheteur/Preneur</MudTh>
+            <MudTh>Date</MudTh>
+            <MudTh>Nombre d'articles</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="ID">@context.Id</MudTd>
+                <MudTd DataLabel="Acheteur/Preneur">@context.BuyerName</MudTd>
+                <MudTd DataLabel="Date">@context.Date.ToString("dd/MM/yyyy HH:mm")</MudTd>
+                <MudTd DataLabel="Nombre d'articles">@context.Items.Count</MudTd>
+                <MudTd>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                               OnClick="@(() => ViewOrder(context.Id))">Voir</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary"
+                               OnClick="@(() => EditOrder(context.Id))">Modifier</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Error"
+                               OnClick="@(() => DeleteOrderDialog(context.Id))">Supprimer</MudButton>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+}
+
+@code {
+    private List<Order> orders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await OrderService.GetOrdersAsync();
+    }
+
+    private void ViewOrder(int id)
+    {
+        NavigationManager.NavigateTo($"/vieworder/{id}");
+    }
+
+    private void EditOrder(int id)
+    {
+        NavigationManager.NavigateTo($"/editorder/{id}");
+    }
+
+    private async Task DeleteOrderDialog(int id)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Êtes-vous sûr de vouloir supprimer cette commande ?");
+        parameters.Add("ButtonText", "Supprimer");
+        parameters.Add("Color", Color.Error);
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialog = DialogService.Show<ConfirmDialog>("Confirmer la suppression", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            await DeleteOrder(id);
+        }
+    }
+
+    private async Task DeleteOrder(int id)
+    {
+        var result = await OrderService.DeleteOrderAsync(id);
+        if (result.Success)
+        {
+            orders.RemoveAll(o => o.Id == id);
+            Snackbar.Add("Commande supprimée avec succès", Severity.Success);
+            StateHasChanged();
+        }
+        else
+        {
+            Snackbar.Add("Erreur lors de la suppression de la commande", Severity.Error);
+        }
+    }
+}
